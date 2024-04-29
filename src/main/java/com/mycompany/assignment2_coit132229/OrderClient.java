@@ -15,14 +15,13 @@ public class OrderClient {
         int serverPort = 1127;
         try {
             Scanner sc = new Scanner(System.in);
-
             
             s = new Socket(hostName, serverPort);
-            ObjectInputStream in = new ObjectInputStream(s.getInputStream());
             ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
+            
             String stopS = "0";
-            String count = "1";
-            while (!stopS.equalsIgnoreCase("3")) {
+            int count = 1;
+            while (!stopS.equals("3")) {
                 System.out.println("Enter details for your member number: " + count);
                 System.out.println("1. Purchase Book");
                 System.out.println("2. Purchase Movie");
@@ -30,7 +29,7 @@ public class OrderClient {
                 System.out.println("***********************************************");
                 System.out.print("Enter Your Option: ");
                 String option = sc.nextLine();
-
+                
                 int quantity, unitPrice;
                 System.out.print("Enter quantity: ");
                 quantity = Integer.parseInt(sc.nextLine()); // Read as String and then parse to handle newline character
@@ -45,10 +44,16 @@ public class OrderClient {
                 }
                 // Send the details to the server
                 out.writeObject(order);
+                ObjectInputStream in = new ObjectInputStream(s.getInputStream());
+                // Wait for server response
+                BookOrder x = (BookOrder)in.readObject();
+                System.out.println("Total Price is: " + x.getResult());
+                
+                count++;
                 stopS = option;
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.print("Message has not been send to client ");
         }
     }

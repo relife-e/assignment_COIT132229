@@ -61,6 +61,7 @@ public class BookOrder implements Serializable, Task {
 
     @Override
     public double getResult() {
-        return 0.0;
+        
+        return 10;
     }
 }

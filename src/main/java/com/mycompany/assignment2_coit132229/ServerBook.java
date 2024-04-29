@@ -10,6 +10,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Timer;
 
@@ -17,13 +18,38 @@ import java.util.Timer;
  *
  * @author Anmol Saru
  */
-public class ServerBook implements Runnable {
-    private Socket cSocket; //initalizing Socket variable
+public class ServerBook{
+    public static void main (String args[]) {
+		
+    try{
+        int serverPort = 1128; 
+        ServerSocket listenSocket = new ServerSocket(serverPort);
 
-    //constructor for ImpRun  with Socket type arguments
-    public ServerBook(Socket s) {
-        cSocket = s;
+        while(true) {
+            Socket clientSocket = listenSocket.accept();
+            Connection c = new Connection(clientSocket);
+        }
 
+    } catch(IOException e) {
+        System.out.println("Listen socket:"+e.getMessage());
+    }
+  }}
+    
+    class Connection extends Thread {
+	
+    ObjectInputStream in;
+    ObjectOutputStream out;
+    Socket clientSocket;
+
+    public Connection (Socket aClientSocket) {
+
+      try {
+        clientSocket = aClientSocket;
+        in = new ObjectInputStream( clientSocket.getInputStream());
+        out =new ObjectOutputStream( clientSocket.getOutputStream());
+        this.start();
+    } catch(IOException e) {
+        System.out.println("Connection:"+e.getMessage());}
     }
 
 
@@ -33,26 +59,24 @@ public class ServerBook implements Runnable {
     @Override
     public void run() {
         try {
-            ObjectInputStream in = new ObjectInputStream(cSocket.getInputStream());
-            ObjectOutputStream out = new ObjectOutputStream(cSocket.getOutputStream()); // creating
-            int bookOrders = 0;
-            while (true) {
-                // Read the data from the client
-                BookOrder x = (BookOrder)in.readObject();
-                    x.executeTask();
-                    x.getResult();
-                    out.writeObject(x.getResult());
-                System.out.print("Message Recived: ");
-                
-                bookOrders++;
-                cSocket.close(); //closing socket
-                out.close();
-                in.close();
-                //catching IOException
-            }//Catching EOFExcpetion
-        } catch (Exception e) {
-            System.out.println("Error while reading file at the end.  " + e.getMessage());
-        } 
 
+            while (true) {
+                BookOrder x = (BookOrder) in.readObject();
+                x.executeTask();
+                out.writeObject(x);
+                out.flush(); // Flush the output stream
+                System.out.println("Seding Data to ServerCordinator");
+            }
+        } catch (IOException e) {
+            System.out.println("Error handling client connection: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.out.println("Class not found: " + e.getMessage());
+        } finally {
+            try {
+                clientSocket.close();
+           } catch (IOException e) {
+               System.out.println("Error closing client socket: " + e.getMessage());
+            }
         }
     }
+}
