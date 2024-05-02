@@ -7,6 +7,15 @@ package com.mycompany.assignment2_coit132229;
 /**
  *
  * @author Anmol Saru
+ *//**
+ *
+ * Author :Anmol Saru Magar
+ * File Name:Task.java
+ * Date :5/3/2025
+ * Purpose :
+ * Defines abstract methods
+ *
+ * ******************************************************
  */
 public interface Task {
    public void executeTask();
